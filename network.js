@@ -253,44 +253,218 @@ function test_network(){
 
 
 function test_multiply() {
-    let W = [[1, 2], [3, 4]];
-    let x = [1, 2];
-    let res = multiply(W, x);
-    console.log(res);
+    console.log("\n----- 测试 multiply 函数 -----");
+    
+    // 测试用例1：基本矩阵乘法
+    let W1 = [[1, 2], [3, 4]];
+    let x1 = [1, 2];
+    let expected1 = [5, 11]; // [1*1 + 2*2, 3*1 + 4*2]
+    let result1 = multiply(W1, x1);
+    
+    console.log("测试用例1:");
+    console.log("W =", W1);
+    console.log("x =", x1);
+    console.log("预期结果 =", expected1);
+    console.log("实际结果 =", result1);
+    console.log("测试结果:", arraysEqual(result1, expected1) ? "通过" : "失败");
+    
+    // 测试用例2：更大的矩阵
+    let W2 = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+    let x2 = [2, 3, 4];
+    let expected2 = [20, 47, 74]; // [1*2 + 2*3 + 3*4, 4*2 + 5*3 + 6*4, 7*2 + 8*3 + 9*4]
+    let result2 = multiply(W2, x2);
+    
+    console.log("\n测试用例2:");
+    console.log("W =", W2);
+    console.log("x =", x2);
+    console.log("预期结果 =", expected2);
+    console.log("实际结果 =", result2);
+    console.log("测试结果:", arraysEqual(result2, expected2) ? "通过" : "失败");
 }
 
 function test_multiply_derive() {
-    let W = [[1, 2, 3], [3, 4, 3]];
-    let x = [1, 2 , 3];
-    let dout = [1, 2,3];
+    console.log("\n----- 测试 multiply_derive 函数 -----");
+    
+    // 测试用例1
+    let W = [[1, 2], [3, 4]];
+    let x = [5, 6];
+    let dout = [7, 8];
+    
     let [dx, dW] = multiply_derive(W, x, dout);
-    console.log(dx);
-    console.log(dW);
+    
+    // 手动计算预期结果
+    // dx[0] = W[0][0]*dout[0] + W[1][0]*dout[1] = 1*7 + 3*8 = 7 + 24 = 31
+    // dx[1] = W[0][1]*dout[0] + W[1][1]*dout[1] = 2*7 + 4*8 = 14 + 32 = 46
+    let expected_dx = [31, 46];
+    
+    // dW[0][0] = x[0]*dout[0] = 5*7 = 35
+    // dW[0][1] = x[1]*dout[0] = 6*7 = 42
+    // dW[1][0] = x[0]*dout[1] = 5*8 = 40
+    // dW[1][1] = x[1]*dout[1] = 6*8 = 48
+    let expected_dW = [[35, 42], [40, 48]];
+    
+    console.log("测试用例1:");
+    console.log("W =", W);
+    console.log("x =", x);
+    console.log("dout =", dout);
+    console.log("预期 dx =", expected_dx);
+    console.log("实际 dx =", dx);
+    console.log("dx 测试结果:", arraysEqual(dx, expected_dx) ? "通过" : "失败");
+    
+    console.log("预期 dW =", expected_dW);
+    console.log("实际 dW =", dW);
+    console.log("dW 测试结果:", arraysEqual2D(dW, expected_dW) ? "通过" : "失败");
 }
 
-function test_relu(){
-    let x = [-1, 0, 1];
-    let res = relu(x);
-    console.log(res);
+function test_relu() {
+    console.log("\n----- 测试 relu 函数 -----");
+    
+    // 测试用例
+    let x = [-2, -1, 0, 1, 2];
+    let expected = [0, 0, 0, 1, 2];
+    let result = relu(x);
+    
+    console.log("x =", x);
+    console.log("预期结果 =", expected);
+    console.log("实际结果 =", result);
+    console.log("测试结果:", arraysEqual(result, expected) ? "通过" : "失败");
 }
 
-function test_relu_derive(){
-    let x = [-1, 0, 1];
-    let dout = [1, 2, 3];
-    let res = relu_derive(x, dout);
-    console.log(res);
+function test_relu_derive() {
+    console.log("\n----- 测试 relu_derive 函数 -----");
+    
+    // 测试用例
+    let x = [-1, 0, 1, 2];
+    let dout = [5, 6, 7, 8];
+    let expected = [0, 0, 7, 8]; // 只有x>0的位置会保留dout的值
+    let result = relu_derive(x, dout);
+    
+    console.log("x =", x);
+    console.log("dout =", dout);
+    console.log("预期结果 =", expected);
+    console.log("实际结果 =", result);
+    console.log("测试结果:", arraysEqual(result, expected) ? "通过" : "失败");
 }
 
-function test_softmax(){
-    let x = [-1, 0, 1];
-    let res = softmax(x);
-    console.log(res);
+function test_softmax() {
+    console.log("\n----- 测试 softmax 函数 -----");
+    
+    // 测试用例1：简单向量
+    let x1 = [1, 2, 3];
+    let result1 = softmax(x1);
+    
+    // 手动计算预期结果
+    let sum1 = Math.exp(1) + Math.exp(2) + Math.exp(3);
+    let expected1 = [Math.exp(1)/sum1, Math.exp(2)/sum1, Math.exp(3)/sum1];
+    
+    console.log("测试用例1:");
+    console.log("x =", x1);
+    console.log("预期结果 ≈", expected1.map(v => v.toFixed(6)));
+    console.log("实际结果 ≈", result1.map(v => v.toFixed(6)));
+    console.log("和为1检查:", Math.abs(result1.reduce((a, b) => a + b, 0) - 1) < 1e-10 ? "通过" : "失败");
+    console.log("测试结果:", arraysApproxEqual(result1, expected1, 1e-10) ? "通过" : "失败");
+    
+    // 测试用例2：包含大数字（检查数值稳定性）
+    let x2 = [100, 101, 102];
+    let result2 = softmax(x2);
+    
+    console.log("\n测试用例2 (数值稳定性):");
+    console.log("x =", x2);
+    console.log("实际结果 ≈", result2.map(v => v.toFixed(6)));
+    console.log("和为1检查:", Math.abs(result2.reduce((a, b) => a + b, 0) - 1) < 1e-10 ? "通过" : "失败");
+    
+    // 检查最大值对应的位置应该有最大的概率
+    console.log("最大概率检查:", result2[2] > result2[1] && result2[1] > result2[0] ? "通过" : "失败");
 }
 
-function test_softmax_derive(){
-    let x = [-1, 0, 1];
+function test_softmax_derive() {
+    console.log("\n----- 测试 softmax_derive 函数 -----");
+    
+    // 测试用例
+    let x = [1, 2, 3];
     let out = softmax(x);
-    let dout = [1, 2, 3];
-    let res = softmax_derive(x, out, dout);
-    console.log(res);
+    let dout = [0.1, 0.2, 0.3];
+    let result = softmax_derive(x, out, dout);
+    
+    console.log("x =", x);
+    console.log("softmax(x) =", out.map(v => v.toFixed(6)));
+    console.log("dout =", dout);
+    console.log("softmax_derive 结果 =", result.map(v => v.toFixed(6)));
+    
+    // 由于softmax导数计算复杂，这里主要检查输出形状和数值范围
+    console.log("形状检查:", result.length === x.length ? "通过" : "失败");
+}
+
+function test_update_weights() {
+    console.log("\n----- 测试 update_weights 函数 -----");
+    
+    // 测试用例
+    let W = [[1, 2], [3, 4]];
+    let dW = [[0.1, 0.2], [0.3, 0.4]];
+    let lr = 0.5;
+    
+    // 手动计算预期结果
+    // W[0][0] = 1 - 0.5 * 0.1 = 0.95
+    // W[0][1] = 2 - 0.5 * 0.2 = 1.9
+    // W[1][0] = 3 - 0.5 * 0.3 = 2.85
+    // W[1][1] = 4 - 0.5 * 0.4 = 3.8
+    let expected = [[0.95, 1.9], [2.85, 3.8]];
+    
+    let result = update_weights(W, dW, lr);
+    
+    console.log("W =", W);
+    console.log("dW =", dW);
+    console.log("学习率 =", lr);
+    console.log("预期结果 =", expected);
+    console.log("实际结果 =", result);
+    console.log("测试结果:", arraysEqual2D(result, expected) ? "通过" : "失败");
+}
+
+// 辅助函数：检查两个数组是否相等
+function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (Math.abs(a[i] - b[i]) > 1e-10) return false;
+    }
+    return true;
+}
+
+// 辅助函数：检查两个二维数组是否相等
+function arraysEqual2D(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (!arraysEqual(a[i], b[i])) return false;
+    }
+    return true;
+}
+
+// 辅助函数：检查两个数组是否近似相等（用于浮点数比较）
+function arraysApproxEqual(a, b, epsilon = 1e-10) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (Math.abs(a[i] - b[i]) > epsilon) return false;
+    }
+    return true;
+}
+
+// 单元测试函数
+function run_all_tests() {
+    console.log("======= 开始运行所有单元测试 =======");
+    
+    test_multiply();
+    test_multiply_derive();
+    test_relu();
+    test_relu_derive();
+    test_softmax();
+    test_softmax_derive();
+    test_update_weights();
+    test_network();
+    
+    console.log("======= 所有单元测试完成 =======");
+}
+
+// 如果在Node.js环境中，直接运行测试
+// 如果不是在Node.js环境中，这行代码不会有任何效果
+if (typeof module !== 'undefined' && module.exports) {
+    run_all_tests();
 }

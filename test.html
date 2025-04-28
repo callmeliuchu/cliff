@@ -1,15 +1,144 @@
-<html></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-    <script src="network.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神经网络测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #output {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Test</h1>
+    <h1>神经网络单元测试</h1>
+    
+    <div>
+        <button onclick="runAllTests()">运行所有测试</button>
+        <button onclick="testMultiply()">测试矩阵乘法</button>
+        <button onclick="testMultiplyDerive()">测试矩阵乘法导数</button>
+        <button onclick="testRelu()">测试ReLU</button>
+        <button onclick="testReluDerive()">测试ReLU导数</button>
+        <button onclick="testSoftmax()">测试Softmax</button>
+        <button onclick="testSoftmaxDerive()">测试Softmax导数</button>
+        <button onclick="testUpdateWeights()">测试权重更新</button>
+        <button onclick="testNetwork()">测试神经网络</button>
+        <button onclick="clearOutput()">清除输出</button>
+    </div>
+    
+    <div id="output"></div>
+    
+    <script src="network.js"></script>
     <script>
-        // test_relu();
-        // test_relu_derive();
-        // test_softmax();
-        // test_softmax_derive();
-        test_network();
+        // 重定向console.log到页面输出
+        (function() {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const output = document.getElementById('output');
+            
+            console.log = function() {
+                // 调用原始的console.log
+                originalConsoleLog.apply(console, arguments);
+                
+                // 将输出添加到页面
+                const args = Array.from(arguments);
+                const text = args.map(arg => {
+                    if (typeof arg === 'object') {
+                        return JSON.stringify(arg, null, 2);
+                    } else {
+                        return String(arg);
+                    }
+                }).join(' ');
+                
+                output.innerHTML += text + '<br>';
+                output.scrollTop = output.scrollHeight;
+            };
+            
+            console.error = function() {
+                // 调用原始的console.error
+                originalConsoleError.apply(console, arguments);
+                
+                // 将错误输出添加到页面（红色文本）
+                const args = Array.from(arguments);
+                const text = args.map(arg => {
+                    if (typeof arg === 'object') {
+                        return JSON.stringify(arg, null, 2);
+                    } else {
+                        return String(arg);
+                    }
+                }).join(' ');
+                
+                output.innerHTML += '<span style="color: red;">' + text + '</span><br>';
+                output.scrollTop = output.scrollHeight;
+            };
+        })();
+        
+        // 测试函数
+        function runAllTests() {
+            clearOutput();
+            run_all_tests();
+        }
+        
+        function testMultiply() {
+            clearOutput();
+            test_multiply();
+        }
+        
+        function testMultiplyDerive() {
+            clearOutput();
+            test_multiply_derive();
+        }
+        
+        function testRelu() {
+            clearOutput();
+            test_relu();
+        }
+        
+        function testReluDerive() {
+            clearOutput();
+            test_relu_derive();
+        }
+        
+        function testSoftmax() {
+            clearOutput();
+            test_softmax();
+        }
+        
+        function testSoftmaxDerive() {
+            clearOutput();
+            test_softmax_derive();
+        }
+        
+        function testUpdateWeights() {
+            clearOutput();
+            test_update_weights();
+        }
+        
+        function testNetwork() {
+            clearOutput();
+            test_network();
+        }
+        
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
     </script>
 </body>
 </html>
