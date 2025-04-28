@@ -254,7 +254,7 @@ function test_network(){
 function cross_entropy(probs,ys){
     let res = 0;
     for(let i = 0; i < probs.length; i++){
-        res += -Math.log(probs[i]) * ys[i];
+        res -= Math.log(probs[i]) * ys[i];
     }
     return res;
 }
@@ -262,7 +262,7 @@ function cross_entropy(probs,ys){
 function cross_entropy_derive(probs,ys){
     let res = [];
     for(let i = 0; i < probs.length; i++){
-        res.push(-ys[i] / probs[i]);
+        res.push(- ys[i] / probs[i]);
     }
     return res;
 }
@@ -281,7 +281,7 @@ function test_xor(){
             let loss = cross_entropy(out_softmax,data[i].output);
             let dout = cross_entropy_derive(out_softmax,data[i].output);
             let [dW1,dW2] = net.grad(data[i].input,h,h_relu,out,out_softmax,dout);
-            net.backward(dW1,dW2,0.01);
+            net.backward(dW1,dW2,0.001);
             // console.log(dout);
             // console.log(dW1);
             // console.log(dW2);
