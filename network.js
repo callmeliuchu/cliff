@@ -262,16 +262,21 @@ function test_network2(){
     let net = new Network2(3, 2, 1);
     let x = [1, 2, 3];
     let y = [1];
+    let data = [
+        {input: [1, 2, 3], output: [1]},
+        {input: [2, 3, 4], output: [2]},
+        {input: [3, 4, 5], output: [3]},
+        {input: [4, 5, 6], output: [4]}
+    ]
     for(let i = 0; i < 1000; i++){
-        let [h, h_relu, out] = net.forward(x);
-        console.log('yyy',out);
-
-        let loss = mean_square_error(y,out);
-        let dout = mean_square_error_derive(y,out);
-        console.log('ddd',dout);
-        let [dW1,dW2] = net.grad(x,h,h_relu,dout);
-        net.backward(dW1,dW2,0.001);
-        console.log(loss);
+        for(let j = 0; j < 4; j++){
+            let [h, h_relu, out] = net.forward(data[j].input);
+            let loss = mean_square_error(data[j].output,out);
+            let dout = mean_square_error_derive(data[j].output,out);
+            let [dW1,dW2] = net.grad(data[j].input,h,h_relu,dout);
+            net.backward(dW1,dW2,0.001);
+            console.log(loss);
+        }
     }
 }
 
