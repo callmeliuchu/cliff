@@ -335,23 +335,31 @@ function cross_entropy_derive(probs,ys){
 
 function test_xor(){
     let data = [
-        {input: [0, 0], output: [1,0]},
-        {input: [0, 1], output: [0,1]},
-        {input: [1, 0], output: [0,1]},
-        {input: [1, 1], output: [1,0]}
+        {input: [0, 1], output: [1,0]},
+        {input: [0.01, 0.01], output: [0,1]},
+        {input: [1, 0], output: [1,0]},
+        {input: [1, 1], output: [0,1]}
     ];
     let net = new Network(2, 4, 2);
     for(let j = 0; j < 1000; j++){
+        let total_dW1 = [];
+        let total_dW2 = [];
         for(let i = 0; i < 4; i++){
             let [h, h_relu, out, out_softmax] = net.forward(data[i].input);
             let loss = cross_entropy(out_softmax,data[i].output);
-            let [dW1,dW2] = net.grad(data[i].input,h,h_relu,out,out_softmax,data[i].output);
-            net.backward(dW1,dW2,0.001);
+            let dout = cross_entropy_derive(out_softmax,data[i].output);
+            let [dW1,dW2] = net.grad(data[i].input,h,h_relu,out,out_softmax,dout);
+            total_dW1.push(dW1);
+            total_dW2.push(dW2);
+            // net.backward(dW1,dW2,0.01);
             // console.log(dout);
             // console.log(dW1);
             // console.log(dW2);
             console.log(out_softmax,data[i].output);
             console.log(loss);
+        }
+        for(let i = 0; i < total_dW1.length; i++){
+            net.backward(total_dW1[i],total_dW2[i],0.01);
         }
     }
 
