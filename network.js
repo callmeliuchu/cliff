@@ -117,7 +117,7 @@ function assert_shape(arr, expected_shape, name) {
         }
     }
     
-    console.log(`${name} shape check passed: [${expected_shape}]`);
+    // console.log(`${name} shape check passed: [${expected_shape}]`);
     return true;
 }
 
@@ -250,6 +250,48 @@ function test_network(){
     console.log(net.W1);
     console.log(net.W2);
 }
+
+function cross_entropy(probs,ys){
+    let res = 0;
+    for(let i = 0; i < probs.length; i++){
+        res += -Math.log(probs[i]) * ys[i];
+    }
+    return res;
+}
+
+function cross_entropy_derive(probs,ys){
+    let res = [];
+    for(let i = 0; i < probs.length; i++){
+        res.push(-ys[i] / probs[i]);
+    }
+    return res;
+}
+
+function test_xor(){
+    let data = [
+        {input: [0, 0], output: [1,0]},
+        {input: [0, 1], output: [0,1]},
+        {input: [1, 0], output: [0,1]},
+        {input: [1, 1], output: [1,0]}
+    ];
+    let net = new Network(2, 4, 2);
+    for(let j = 0; j < 1000; j++){
+        for(let i = 0; i < 4; i++){
+            let [h, h_relu, out, out_softmax] = net.forward(data[i].input);
+            let loss = cross_entropy(out_softmax,data[i].output);
+            let dout = cross_entropy_derive(out_softmax,data[i].output);
+            let [dW1,dW2] = net.grad(data[i].input,h,h_relu,out,out_softmax,dout);
+            net.backward(dW1,dW2,0.01);
+            // console.log(dout);
+            // console.log(dW1);
+            // console.log(dW2);
+            console.log(loss);
+        }
+    }
+
+}
+
+
 
 
 function test_multiply() {
