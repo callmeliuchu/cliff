@@ -76,7 +76,7 @@ function softmax_derive(x,out,dout){
     for(let i = 0; i < x.length; i++){
         let _sum = 0;
         for(let j = 0; j < x.length; j++){
-            _sum += dout[j] * (i == j ? 1 - out[i] : -out[i] * out[j]);
+            _sum += dout[j] * (i == j ? (1 - out[i]) * out[i] : -out[i] * out[j]);
         }
         res.push(_sum);
     }
@@ -262,7 +262,7 @@ function cross_entropy(probs,ys){
 function cross_entropy_derive(probs,ys){
     let res = [];
     for(let i = 0; i < probs.length; i++){
-        res.push(- ys[i] / probs[i]);
+        res.push(-ys[i] / probs[i]);
     }
     return res;
 }
@@ -281,7 +281,7 @@ function test_xor(){
             let loss = cross_entropy(out_softmax,data[i].output);
             let dout = cross_entropy_derive(out_softmax,data[i].output);
             let [dW1,dW2] = net.grad(data[i].input,h,h_relu,out,out_softmax,dout);
-            net.backward(dW1,dW2,0.001);
+            net.backward(dW1,dW2,0.01);
             // console.log(dout);
             // console.log(dW1);
             // console.log(dW2);
