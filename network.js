@@ -224,32 +224,15 @@ class Network2{
         return W;
     }
     forward(x){
-        // 检查输入形状
-        assert_shape(x, [this.input_size], "input x");
-        
         let h = multiply(this.W1, x);
-        // 检查h形状
-        assert_shape(h, [this.hidden_size], "h");
-        
         let h_relu = relu(h);
-        // 检查h_relu形状
-        assert_shape(h_relu, [this.hidden_size], "h_relu");
-        
         let out = multiply(this.W2, h_relu);
-        // 检查out形状
-        assert_shape(out, [this.output_size], "out");
-        
         return [h, h_relu, out];
     }
     grad(x,h,h_relu,dout){
-
         let [dh,dW2] = multiply_derive(this.W2,h_relu,dout);
-        
-        let [dx,dW1] = multiply_derive(this.W1,x,dh);
-        // 检查dx和dW1形状
-        assert_shape(dx, [this.input_size], "dx");
-        assert_shape(dW1, [this.hidden_size, this.input_size], "dW1");
-        
+        let dh_relu = relu_derive(h,dh);
+        let [dx,dW1] = multiply_derive(this.W1,x,dh_relu);
         return [dW1,dW2];
     }
 
@@ -270,7 +253,7 @@ function mean_square_error(y,y_hat){
 function mean_square_error_derive(y,y_hat){
     let res = [];
     for(let i = 0; i < y.length; i++){
-        res.push(2 * (y[i] - y_hat[i]));
+        res.push(2 * (-y[i] + y_hat[i]));
     }
     return res;
 }
@@ -279,7 +262,7 @@ function test_network2(){
     let net = new Network2(3, 2, 1);
     let x = [1, 2, 3];
     let y = [1];
-    for(let i = 0; i < 100; i++){
+    for(let i = 0; i < 1000; i++){
         let [h, h_relu, out] = net.forward(x);
         console.log('yyy',out);
 
