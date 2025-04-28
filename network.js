@@ -199,6 +199,100 @@ class Network{
     }
 }
 
+class Network2{
+    constructor(input_size, hidden_size, output_size){
+        this.input_size = input_size;
+        this.hidden_size = hidden_size;
+        this.output_size = output_size;
+        this.W1 = this.init_weights(input_size, hidden_size);
+        this.W2 = this.init_weights(hidden_size, output_size);
+        
+        // 检查权重矩阵形状
+        assert_shape(this.W1, [hidden_size, input_size], "W1");
+        assert_shape(this.W2, [output_size, hidden_size], "W2");
+    }
+
+    init_weights(m,n){
+        let W = [];
+        for(let i = 0; i < n; i++){
+            let row = [];
+            for(let j = 0; j < m; j++){
+                row.push(Math.random() - 0.5);
+            }
+            W.push(row);
+        }
+        return W;
+    }
+    forward(x){
+        // 检查输入形状
+        assert_shape(x, [this.input_size], "input x");
+        
+        let h = multiply(this.W1, x);
+        // 检查h形状
+        assert_shape(h, [this.hidden_size], "h");
+        
+        let h_relu = relu(h);
+        // 检查h_relu形状
+        assert_shape(h_relu, [this.hidden_size], "h_relu");
+        
+        let out = multiply(this.W2, h_relu);
+        // 检查out形状
+        assert_shape(out, [this.output_size], "out");
+        
+        return [h, h_relu, out];
+    }
+    grad(x,h,h_relu,dout){
+
+        let [dh,dW2] = multiply_derive(this.W2,h_relu,dout);
+        
+        let [dx,dW1] = multiply_derive(this.W1,x,dh);
+        // 检查dx和dW1形状
+        assert_shape(dx, [this.input_size], "dx");
+        assert_shape(dW1, [this.hidden_size, this.input_size], "dW1");
+        
+        return [dW1,dW2];
+    }
+
+    backward(dW1,dW2, lr){
+        this.W1 = update_weights(this.W1,dW1,lr);
+        this.W2 = update_weights(this.W2,dW2,lr);
+    }
+}
+
+function mean_square_error(y,y_hat){
+    let res = 0;
+    for(let i = 0; i < y.length; i++){
+        res += (y[i] - y_hat[i]) ** 2;
+    }
+    return res / y.length;
+}
+
+function mean_square_error_derive(y,y_hat){
+    let res = [];
+    for(let i = 0; i < y.length; i++){
+        res.push(2 * (y[i] - y_hat[i]));
+    }
+    return res;
+}
+
+function test_network2(){
+    let net = new Network2(3, 2, 1);
+    let x = [1, 2, 3];
+    let y = [1];
+    for(let i = 0; i < 100; i++){
+        let [h, h_relu, out] = net.forward(x);
+        console.log('yyy',out);
+
+        let loss = mean_square_error(y,out);
+        let dout = mean_square_error_derive(y,out);
+        console.log('ddd',dout);
+        let [dW1,dW2] = net.grad(x,h,h_relu,dout);
+        net.backward(dW1,dW2,0.001);
+        console.log(loss);
+    }
+}
+
+
 function test_network(){
     let net = new Network(3, 4, 3);
     console.log("Network initialized with input_size=3, hidden_size=4, output_size=3");
@@ -254,18 +348,11 @@ function test_network(){
 function cross_entropy(probs,ys){
     let res = 0;
     for(let i = 0; i < probs.length; i++){
-        res -= Math.log(probs[i]) * ys[i];
+        res -= Math.log(Math.max(probs[i], 1e-15)) * ys[i];
     }
     return res;
 }
 
-function cross_entropy_derive(probs,ys){
-    let res = [];
-    for(let i = 0; i < probs.length; i++){
-        res.push(-ys[i]);
-    }
-    return res;
-}
 
 function test_xor(){
     let data = [
@@ -279,9 +366,8 @@ function test_xor(){
         for(let i = 0; i < 4; i++){
             let [h, h_relu, out, out_softmax] = net.forward(data[i].input);
             let loss = cross_entropy(out_softmax,data[i].output);
-            // let dout = cross_entropy_derive(out_softmax,data[i].output);
             let [dW1,dW2] = net.grad(data[i].input,h,h_relu,out,out_softmax,data[i].output);
-            net.backward(dW1,dW2,0.01);
+            net.backward(dW1,dW2,0.001);
             // console.log(dout);
             // console.log(dW1);
             // console.log(dW2);
