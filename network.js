@@ -42,18 +42,20 @@ function multiply_derive(W, x, dout) {
 
 
 function relu(x){
+    // leaky relu
     // x is a vector of inputs
     let res = [];
     for(let i = 0; i < x.length; i++){
-        res.push(Math.max(0, x[i]));
+        res.push(Math.max(0.01*x[i], x[i]));
     }
     return res;
 }
 
 function relu_derive(x,dout){
+    // leaky relu
     let res = [];
     for(let i = 0; i < x.length; i++){
-        res.push(x[i] > 0 ? dout[i] : 0);
+        res.push(x[i] > 0 ? dout[i] : 0.01*dout[i]);
     }
     return res;
 }
@@ -76,7 +78,7 @@ function softmax_derive(x,out,dout){
     for(let i = 0; i < x.length; i++){
         let _sum = 0;
         for(let j = 0; j < x.length; j++){
-            _sum += dout[j] * (i == j ? (1 - out[i]) : -out[i]);
+            _sum += dout[j] * (i == j ? (1 - out[i])*out[i] : -out[i]*out[j]);
         }
         res.push(_sum);
     }
@@ -168,28 +170,10 @@ class Network{
         return [h, h_relu, out, out_softmax];
     }
     grad(x,h,h_relu,out,out_softmax,dout){
-        // 检查各个输入形状
-        assert_shape(x, [this.input_size], "grad input x");
-        assert_shape(h, [this.hidden_size], "grad h");
-        assert_shape(h_relu, [this.hidden_size], "grad h_relu");
-        assert_shape(out, [this.output_size], "grad out");
-        assert_shape(out_softmax, [this.output_size], "grad out_softmax");
-        assert_shape(dout, [this.output_size], "grad dout");
-        
         let softmax_dout = softmax_derive(out,out_softmax,dout);
-        // 检查softmax_dout形状
-        assert_shape(softmax_dout, [this.output_size], "softmax_dout");
-        
         let [dh,dW2] = multiply_derive(this.W2,h_relu,softmax_dout);
-        // 检查dh和dW2形状
-        assert_shape(dh, [this.hidden_size], "dh");
-        assert_shape(dW2, [this.output_size, this.hidden_size], "dW2");
-        
-        let [dx,dW1] = multiply_derive(this.W1,x,dh);
-        // 检查dx和dW1形状
-        assert_shape(dx, [this.input_size], "dx");
-        assert_shape(dW1, [this.hidden_size, this.input_size], "dW1");
-        
+        let dh_relu = relu_derive(h,dh);
+        let [dx,dW1] = multiply_derive(this.W1,x,dh_relu);
         return [dW1,dW2];
     }
 
@@ -259,7 +243,7 @@ function mean_square_error_derive(y,y_hat){
 }
 
 function test_network2(){
-    let net = new Network2(3, 2, 1);
+    let net = new Network2(3, 10, 1);
     let x = [1, 2, 3];
     let y = [1];
     let data = [
@@ -274,7 +258,7 @@ function test_network2(){
             let loss = mean_square_error(data[j].output,out);
             let dout = mean_square_error_derive(data[j].output,out);
             let [dW1,dW2] = net.grad(data[j].input,h,h_relu,dout);
-            net.backward(dW1,dW2,0.001);
+            net.backward(dW1,dW2,0.01);
             console.log(loss);
         }
     }
@@ -341,6 +325,13 @@ function cross_entropy(probs,ys){
     return res;
 }
 
+function cross_entropy_derive(probs,ys){
+    let res = [];
+    for(let i = 0; i < probs.length; i++){
+        res.push(-ys[i] / probs[i]);
+    }
+    return res;
+}
 
 function test_xor(){
     let data = [
@@ -359,6 +350,7 @@ function test_xor(){
             // console.log(dout);
             // console.log(dW1);
             // console.log(dW2);
+            console.log(out_softmax,data[i].output);
             console.log(loss);
         }
     }
