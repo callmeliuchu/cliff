@@ -6,25 +6,87 @@
     <title>CliffWalk 可视化</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
         }
         #canvas-container {
-            margin-top: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
         }
         canvas {
-            border: 1px solid #000;
+            display: block;
+            border: none;
             background-color: #f0f0f0;
         }
         .controls {
-            margin: 10px 0;
+            margin: 20px auto;
+            max-width: 600px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
         button {
-            padding: 5px 10px;
-            margin-right: 10px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #pause-training {
+            background-color: #e74c3c;
+        }
+        #pause-training:hover {
+            background-color: #c0392b;
+        }
+        #demo-policy {
+            background-color: #2ecc71;
+        }
+        #demo-policy:hover {
+            background-color: #27ae60;
+        }
+        .speed-control {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+        input[type="range"] {
+            margin: 0 10px;
         }
         .info {
-            margin-top: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .info p {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .info span {
+            font-weight: bold;
+            color: #3498db;
         }
     </style>
 </head>
@@ -36,8 +98,10 @@
         <button id="pause-training">暂停</button>
         <button id="step-training">单步执行</button>
         <button id="demo-policy">演示最优策略</button>
-        <input type="range" id="speed-control" min="1" max="100" value="50">
-        <label for="speed-control">速度</label>
+        <div class="speed-control">
+            <input type="range" id="speed-control" min="1" max="100" value="50">
+            <label for="speed-control">速度</label>
+        </div>
     </div>
     
     <div class="info">

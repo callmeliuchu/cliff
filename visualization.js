@@ -5,13 +5,38 @@ class CliffWalkVisualization {
         this.env = env;
         this.cellWidth = canvas.width / env.cols;
         this.cellHeight = canvas.height / env.rows;
+        
+        // 更新颜色和样式
         this.agentColor = '#3498db';
         this.goalColor = '#2ecc71';
         this.cliffColor = '#e74c3c';
         this.gridColor = '#bdc3c7';
-        this.pathColor = 'rgba(52, 152, 219, 0.3)';
+        this.pathColor = 'rgba(52, 152, 219, 0.2)';
+        this.groundColor = '#f9f9f9';
+        
+        // 加载图像
+        this.loadImages();
+        
         this.agentHistory = [];
         this.visitedCells = new Set();
+    }
+    
+    loadImages() {
+        // 加载智能体图像
+        this.agentImg = new Image();
+        this.agentImg.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMzQ5OGRiIiBkPSJNMjU2IDhDMTE5LjAzMyA4IDggMTE5LjAzMyA4IDI1NnMxMTEuMDMzIDI0OCAyNDggMjQ4IDI0OC0xMTEuMDMzIDI0OC0yNDhTMzkyLjk2NyA4IDI1NiA4em0wIDMyYzEyLjc1IDAgMjMgMTAuMjUgMjMgMjNzLTEwLjI1IDIzLTIzIDIzLTIzLTEwLjI1LTIzLTIzIDEwLjI1LTIzIDIzLTIzek0zMjAgMzg0Yy0xNy42NyAwLTMyLTE0LjMzLTMyLTMydi0xMjhjMC0xNy42NyAxNC4zMy0zMiAzMi0zMmg2NHYxNjBjMCAxNy42Ny0xNC4zMyAzMi0zMiAzMnoiLz48L3N2Zz4=';
+        
+        // 加载悬崖图像
+        this.cliffImg = new Image();
+        this.cliffImg.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48cGF0aCBmaWxsPSIjZTc0YzNjIiBkPSJNNDY0IDMySDExMmMtNTIuOCAwLTk2IDQzLjItOTYgOTZ2MzIwYzAgMTcuNyAxNC4zIDMyIDMyIDMyaDQ4MGMxNy43IDAgMzItMTQuMyAzMi0zMlYxMjhjMC01Mi44LTQzLjItOTYtOTYtOTZ6TTEyOCA0MTZjLTI2LjUgMC00OC0yMS41LTQ4LTQ4czIxLjUtNDggNDgtNDggNDggMjEuNSA0OCA0OC0yMS41IDQ4LTQ4IDQ4em0xNi0xMTJjLTI2LjUgMC00OC0yMS41LTQ4LTQ4czIxLjUtNDggNDgtNDggNDggMjEuNSA0OCA0OC0yMS41IDQ4LTQ4IDQ4em05NiAwYy0yNi41IDAtNDgtMjEuNS00OC00OHMyMS41LTQ4IDQ4LTQ4IDQ4IDIxLjUgNDggNDgtMjEuNSA0OC00OCA0OHptOTYgMGMtMjYuNSAwLTQ4LTIxLjUtNDgtNDhzMjEuNS00OCA0OC00OCA0OCAyMS41IDQ4IDQ4LTIxLjUgNDgtNDggNDh6bTk2IDAtNDgtNDhzMjEuNS00OCA0OC00OCA0OCAyMS41IDQ4IDQ4LTIxLjUgNDgtNDggNDh6Ii8+PC9zdmc+';
+        
+        // 加载终点图像
+        this.goalImg = new Image();
+        this.goalImg.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMmVjYzcxIiBkPSJNMjU2IDhDMTE5LjAzMyA4IDggMTE5LjAzMyA4IDI1NnMxMTEuMDMzIDI0OCAyNDggMjQ4IDI0OC0xMTEuMDMzIDI0OC0yNDhTMzkyLjk2NyA4IDI1NiA4em0xMTQuMjUyIDI5Ni40MWMtMy42ODIgMy42ODItNS41MjMgOC4xMTQtNS41MjMgMTMuMDk2IDAgNS4wMjcgMS44NDEgOS40NTkgNS41MjMgMTMuMTQxIDMuNjgyIDMuNjgyIDguMTY4IDUuNTIzIDEzLjE0MSA1LjUyMyA0Ljk3MyAwIDkuNDU5LTEuODQxIDEzLjE0MS01LjUyMyAzLjY4Mi0zLjY4MiA1LjUyMy04LjExNCA1LjUyMy0xMy4xNDEgMC00Ljk4Mi0xLjg0MS05LjQxNC01LjUyMy0xMy4wOTYtMy42ODItMy42ODItOC4xNjgtNS41MjMtMTMuMTQxLTUuNTIzLTQuOTczIDAtOS40NTkgMS44NDEtMTMuMTQxIDUuNTIzem0tMjU2LjY2MiAwYy0zLjY4MiAzLjY4Mi01LjUyMyA4LjExNC01LjUyMyAxMy4wOTYgMCA1LjAyNyAxLjg0MSA5LjQ1OSA1LjUyMyAxMy4xNDEgMy42ODIgMy42ODIgOC4xNjggNS41MjMgMTMuMTQxIDUuNTIzIDQuOTczIDAgOS40NTktMS44NDEgMTMuMTQxLTUuNTIzIDMuNjgyLTMuNjgyIDUuNTIzLTguMTE0IDUuNTIzLTEzLjE0MSAwLTQuOTgyLTEuODQxLTkuNDE0LTUuNTIzLTEzLjA5Ni0zLjY4Mi0zLjY4Mi04LjE2OC01LjUyMy0xMy4xNDEtNS41MjMtNC45NzMgMC05LjQ1OSAxLjg0MS0xMy4xNDEgNS41MjN6bTI1Ni0yMjYuODA0YzEuNTAxIDEuNTAxIDMuMzQ2IDIuMjUxIDUuNTIzIDIuMjUxIDIuMTc3IDAgNC4wMjItLjc1IDUuNTIzLTIuMjUxIDEuNTAxLTEuNTAxIDIuMjUxLTMuMzQ2IDIuMjUxLTUuNTIzIDAtMi4xNzctLjc1LTQuMDIyLTIuMjUxLTUuNTIzLTEuNTAxLTEuNTAxLTMuMzQ2LTIuMjUxLTUuNTIzLTIuMjUxLTIuMTc3IDAtNC4wMjIuNzUtNS41MjMgMi4yNTEtMS41MDEgMS41MDEtMi4yNTEgMy4zNDYtMi4yNTEgNS41MjMgMCAyLjE3Ny43NSA0LjAyMiAyLjI1MSA1LjUyM3ptLTI1NiAwYzEuNTAxIDEuNTAxIDMuMzQ2IDIuMjUxIDUuNTIzIDIuMjUxIDIuMTc3IDAgNC4wMjItLjc1IDUuNTIzLTIuMjUxIDEuNTAxLTEuNTAxIDIuMjUxLTMuMzQ2IDIuMjUxLTUuNTIzIDAtMi4xNzctLjc1LTQuMDIyLTIuMjUxLTUuNTIzLTEuNTAxLTEuNTAxLTMuMzQ2LTIuMjUxLTUuNTIzLTIuMjUxLTIuMTc3IDAtNC4wMjIuNzUtNS41MjMgMi4yNTEtMS41MDEgMS41MDEtMi4yNTEgMy4zNDYtMi4yNTEgNS41MjMgMCAyLjE3Ny43NSA0LjAyMiAyLjI1MSA1LjUyM3ptMTI4LTMyYzM1LjM0NiAwIDY0IDI4LjY1NCA2NCA2NHYxMjhjMCAzNS4zNDYtMjguNjU0IDY0LTY0IDY0cy02NC0yOC42NTQtNjQtNjRWMTQ0YzAtMzUuMzQ2IDI4LjY1NC02NCA2NC02NHptMCAzMmMtMTcuNjczIDAtMzIgMTQuMzI3LTMyIDMydjEyOGMwIDE3LjY3MyAxNC4zMjcgMzIgMzIgMzJzMzItMTQuMzI3IDMyLTMyVjE0NGMwLTE3LjY3My0xNC4zMjctMzItMzItMzJ6Ii8+PC9zdmc+';
+        
+        // 加载地面图像
+        this.groundImg = new Image();
+        this.groundImg.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZjlmOWY5IiBkPSJNMCAwaDUxMnY1MTJIMHoiLz48cGF0aCBmaWxsPSIjZWVlZWVlIiBkPSJNMzIgMzJoNDQ4djQ0OEgzMnoiLz48L3N2Zz4=';
     }
 
     clear() {
@@ -21,6 +46,11 @@ class CliffWalkVisualization {
     }
 
     drawGrid() {
+        // 绘制背景
+        this.ctx.fillStyle = this.groundColor;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // 绘制网格线
         this.ctx.strokeStyle = this.gridColor;
         this.ctx.lineWidth = 1;
 
@@ -39,28 +69,69 @@ class CliffWalkVisualization {
             this.ctx.lineTo(this.canvas.width, i * this.cellHeight);
             this.ctx.stroke();
         }
+        
+        // 绘制地面纹理
+        for (let row = 0; row < this.env.rows; row++) {
+            for (let col = 0; col < this.env.cols; col++) {
+                // 跳过悬崖和目标位置
+                if (row === this.env.rows - 1 && col > 0 && col < this.env.cols - 1) continue;
+                if (row === this.env.rows - 1 && col === this.env.cols - 1) continue;
+                
+                this.ctx.drawImage(
+                    this.groundImg,
+                    col * this.cellWidth + 1,
+                    row * this.cellHeight + 1,
+                    this.cellWidth - 2,
+                    this.cellHeight - 2
+                );
+            }
+        }
     }
 
     drawEnvironment() {
         // 绘制悬崖
-        this.ctx.fillStyle = this.cliffColor;
         for (let col = 1; col < this.env.cols - 1; col++) {
             const row = this.env.rows - 1;
+            
+            // 绘制悬崖背景
+            this.ctx.fillStyle = this.cliffColor;
             this.ctx.fillRect(
-                col * this.cellWidth,
-                row * this.cellHeight,
-                this.cellWidth,
-                this.cellHeight
+                col * this.cellWidth + 1,
+                row * this.cellHeight + 1,
+                this.cellWidth - 2,
+                this.cellHeight - 2
+            );
+            
+            // 绘制悬崖图像
+            this.ctx.drawImage(
+                this.cliffImg,
+                col * this.cellWidth + 5,
+                row * this.cellHeight + 5,
+                this.cellWidth - 10,
+                this.cellHeight - 10
             );
         }
 
         // 绘制目标
+        const goalRow = this.env.rows - 1;
+        const goalCol = this.env.cols - 1;
+        
+        // 绘制目标背景
         this.ctx.fillStyle = this.goalColor;
         this.ctx.fillRect(
-            (this.env.cols - 1) * this.cellWidth,
-            (this.env.rows - 1) * this.cellHeight,
-            this.cellWidth,
-            this.cellHeight
+            goalCol * this.cellWidth + 1,
+            goalRow * this.cellHeight + 1,
+            this.cellWidth - 2,
+            this.cellHeight - 2
+        );
+        
+        // 绘制目标图像
+        this.ctx.drawImage(
+            this.goalImg,
+            goalCol * this.cellWidth + 5,
+            goalRow * this.cellHeight + 5,
+            this.cellWidth - 10,
+            this.cellHeight - 10
         );
     }
 
@@ -96,22 +167,26 @@ class CliffWalkVisualization {
             }
             
             this.ctx.fillRect(
-                c * this.cellWidth,
-                r * this.cellHeight,
-                this.cellWidth,
-                this.cellHeight
+                c * this.cellWidth + 2,
+                r * this.cellHeight + 2,
+                this.cellWidth - 4,
+                this.cellHeight - 4
             );
         }
         
         // 绘制智能体
-        this.ctx.fillStyle = this.agentColor;
         const centerX = (col + 0.5) * this.cellWidth;
         const centerY = (row + 0.5) * this.cellHeight;
-        const radius = Math.min(this.cellWidth, this.cellHeight) * 0.4;
+        const size = Math.min(this.cellWidth, this.cellHeight) * 0.7;
         
-        this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        this.ctx.fill();
+        // 绘制智能体图像
+        this.ctx.drawImage(
+            this.agentImg,
+            centerX - size/2,
+            centerY - size/2,
+            size,
+            size
+        );
     }
 
     render(state) {
