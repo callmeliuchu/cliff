@@ -168,8 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 添加演示按钮事件处理
     demoButton.addEventListener('click', () => {
-        if (!isTraining || isPaused) {
-            runDemonstration();
+        console.log("演示按钮被点击");
+        // 无论训练状态如何，都尝试运行演示
+        if (window.runDemonstration) {
+            window.runDemonstration();
+        } else {
+            console.error("runDemonstration 函数未定义");
         }
     });
     

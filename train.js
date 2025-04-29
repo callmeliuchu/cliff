@@ -212,7 +212,11 @@ async function runSingleEpoch() {
 
 // 演示最优策略
 async function demonstrateOptimalPolicy() {
-    if (isRunning) return;
+    console.log("开始演示最优策略");
+    
+    // 暂停当前训练（如果正在进行）
+    let wasRunning = isRunning;
+    isRunning = false;
     
     // 清除可视化历史
     if (typeof window !== 'undefined' && window.initVisualization) {
@@ -227,25 +231,40 @@ async function demonstrateOptimalPolicy() {
         window.updateVisualization(state, "演示", totalReward);
     }
     
-    while (!env.done) {
-        // 使用最大概率动作（贪婪策略）
-        let action = agent.get_max_prob_action(state);
-        let [next_state, reward, done] = env.step(action);
-        totalReward += reward;
-        
-        // 更新可视化
-        if (typeof window !== 'undefined' && window.updateVisualization) {
-            window.updateVisualization(next_state, "演示", totalReward);
-            
-            // 控制动画速度
-            const speed = window.getAnimationSpeed ? window.getAnimationSpeed() : 50;
-            await new Promise(resolve => setTimeout(resolve, 101 - speed));
-        }
-        
-        state = next_state;
+    // 确保agent已经初始化
+    if (!agent) {
+        console.error("智能体未初始化");
+        return;
     }
     
-    console.log('演示完成，总奖励: ' + totalReward);
+    try {
+        while (!env.done) {
+            // 使用最大概率动作（贪婪策略）
+            let action = agent.get_max_prob_action(state);
+            console.log(`状态 ${state}, 选择动作 ${action}`);
+            
+            let [next_state, reward, done] = env.step(action);
+            totalReward += reward;
+            
+            // 更新可视化
+            if (typeof window !== 'undefined' && window.updateVisualization) {
+                window.updateVisualization(next_state, "演示", totalReward);
+                
+                // 控制动画速度
+                const speed = window.getAnimationSpeed ? window.getAnimationSpeed() : 50;
+                await new Promise(resolve => setTimeout(resolve, 101 - speed));
+            }
+            
+            state = next_state;
+        }
+        
+        console.log('演示完成，总奖励: ' + totalReward);
+    } catch (error) {
+        console.error("演示过程中出错:", error);
+    }
+    
+    // 恢复之前的训练状态
+    isRunning = wasRunning;
 }
 
 // 浏览器环境下的初始化
@@ -256,7 +275,10 @@ if (typeof window !== 'undefined') {
         // 连接到可视化控制
         window.startVisualization = startTraining;
         window.runSingleEpoch = runSingleEpoch;
-        window.runDemonstration = demonstrateOptimalPolicy; // 新增的演示函数
+        window.runDemonstration = demonstrateOptimalPolicy; // 确保这个赋值正确
+        
+        // 直接在控制台输出，确认函数已赋值
+        console.log("演示函数已设置:", !!window.runDemonstration);
     });
 } else {
     // Node.js环境下直接运行
