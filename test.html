@@ -42,56 +42,16 @@
         <button onclick="testNetwork()">测试神经网络</button>
         <button onclick="testNetwork2()">测试神经网络2</button>
         <button onclick="testXor()">测试XOR</button>
-        <button onclick="clearOutput()">清除输出</button>
+
     </div>
     
     <div id="output"></div>
     
     <script src="network.js"></script>
+    <script src="env.js"></script>
+    <script src="train.js"></script>
+
     <script>
-        // 重定向console.log到页面输出
-        (function() {
-            const originalConsoleLog = console.log;
-            const originalConsoleError = console.error;
-            const output = document.getElementById('output');
-            
-            console.log = function() {
-                // 调用原始的console.log
-                originalConsoleLog.apply(console, arguments);
-                
-                // 将输出添加到页面
-                const args = Array.from(arguments);
-                const text = args.map(arg => {
-                    if (typeof arg === 'object') {
-                        return JSON.stringify(arg, null, 2);
-                    } else {
-                        return String(arg);
-                    }
-                }).join(' ');
-                
-                output.innerHTML += text + '<br>';
-                output.scrollTop = output.scrollHeight;
-            };
-            
-            console.error = function() {
-                // 调用原始的console.error
-                originalConsoleError.apply(console, arguments);
-                
-                // 将错误输出添加到页面（红色文本）
-                const args = Array.from(arguments);
-                const text = args.map(arg => {
-                    if (typeof arg === 'object') {
-                        return JSON.stringify(arg, null, 2);
-                    } else {
-                        return String(arg);
-                    }
-                }).join(' ');
-                
-                output.innerHTML += '<span style="color: red;">' + text + '</span><br>';
-                output.scrollTop = output.scrollHeight;
-            };
-        })();
-        
         // 测试函数
         function runAllTests() {
             clearOutput();
@@ -148,9 +108,6 @@
             test_xor();
         }
         
-        function clearOutput() {
-            document.getElementById('output').innerHTML = '';
-        }
     </script>
 </body>
 </html>
