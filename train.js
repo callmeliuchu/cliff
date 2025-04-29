@@ -71,6 +71,8 @@ class Agent{
                     rs.push(0);
                 }
             }
+            let entropy = cross_entropy(out_softmax,rs);
+            console.log('entropy',entropy);
             let dout = cross_entropy_derive(out_softmax,rs);
             // console.log(dout);
             // console.log(out_softmax);
