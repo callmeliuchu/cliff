@@ -25,13 +25,18 @@ function discount_rewards(rewards,gamma){
         adding = rewards[i] + gamma * adding;
         res.push(adding);
     }
-    return res.reverse();
+    res = res.reverse();
+    // mean std
+    let mean = res.reduce((a,b)=>a+b,0)/res.length;
+    let std = Math.sqrt(res.reduce((a,b)=>a+Math.pow(b-mean,2),0)/res.length);
+    res = res.map(x=>x/std);
+    return res; 
 }
 
 
 class Agent{
     constructor(){
-        this.policy_net = new Network2(48, 200, 4);
+        this.policy_net = new Network(48, 200, 4);
     }
     get_action(state){
         let state_arr = [];
@@ -43,9 +48,10 @@ class Agent{
             }
         }
         let [h, h_relu, out, out_softmax] = this.policy_net.forward(state_arr); // 4
+        // console.log(state_arr,out_softmax);
         // 采样动作，javascript没有np.random.choice，根据probs 概率采样，概率大的采样概率大
         let action = sampleAction(out_softmax);
-        return [h, h_relu, out, out_softmax,action];
+        return [state_arr, h, h_relu, out, out_softmax,action];
     }
     update(rewards,agent_outputs){
         // let dW1,dW2 = this.policy_net.grad(states,actions,rewards,probs);
@@ -53,7 +59,7 @@ class Agent{
         rewards = discount_rewards(rewards,0.99);
         for(let i=0;i<rewards.length;i++){
             let reward = rewards[i]; // 1
-            let [h, h_relu, out, out_softmax,action] = agent_outputs[i]; // [h, h_relu, out, out_softmax,action]
+            let [state_arr, h, h_relu, out, out_softmax,action] = agent_outputs[i]; // [h, h_relu, out, out_softmax,action]
             let rs =  [];
             for(let k=0;k<4;k++){
                 if(k == action){
@@ -63,8 +69,13 @@ class Agent{
                 }
             }
             let dout = cross_entropy_derive(out_softmax,rs);
-            let dW1,dW2 = this.policy_net.grad(x,h,h_relu,out,out_softmax,dout);
-            this.policy_net.backward(dW1,dW2,lr);
+            // console.log(dout);
+            // console.log(out_softmax);
+            // console.log(rs);
+            let [dW1,dW2] = this.policy_net.grad(state_arr,h,h_relu,out,out_softmax,dout);
+            // console.log('dw1',dW1)
+            // console.log('dw2',dW2)
+            this.policy_net.backward(dW1,dW2,0.01);
         }
     }
 }
@@ -73,18 +84,19 @@ let env = new CliffWalkEnv();
 let agent = new Agent();
 
 for(let epoch=0;epoch<1000;epoch++){
-    let done = false;
     let rewards = [];
     let agent_outputs = [];
     let state = env.reset();
-    while(!done){
-        let [h, h_relu, out, out_softmax,action] = agent.get_action(state);
+    while(!env.done){
+        let [state_arr, h, h_relu, out, out_softmax,action] = agent.get_action(state);
         let [next_state, reward, done] = env.step(action);
         rewards.push(reward);
-        agent_outputs.push([h, h_relu, out, out_softmax,action]);
+        agent_outputs.push([state_arr, h, h_relu, out, out_softmax,action]);
         state = next_state;
     }
     agent.update(rewards,agent_outputs);
+    console.log('rewards1111',env.totalReward);
+
 }
 
 
