@@ -18,6 +18,9 @@ function sampleAction(probs) {
 }
 
 
+let n_states = 8;
+let n_actions = 4;
+
 function discount_rewards(rewards,gamma){
     let res = [];
     let adding = 0;
@@ -36,11 +39,11 @@ function discount_rewards(rewards,gamma){
 
 class Agent{
     constructor(){
-        this.policy_net = new Network(48, 200, 4);
+        this.policy_net = new Network(n_states, 200, n_actions);
     }
     get_action(state){
         let state_arr = [];
-        for(let i=0;i<48;i++){
+        for(let i=0;i<n_states;i++){
             if(i == state){
                 state_arr.push(1);
             }else{
@@ -61,7 +64,7 @@ class Agent{
             let reward = rewards[i]; // 1
             let [state_arr, h, h_relu, out, out_softmax,action] = agent_outputs[i]; // [h, h_relu, out, out_softmax,action]
             let rs =  [];
-            for(let k=0;k<4;k++){
+            for(let k=0;k<n_actions;k++){
                 if(k == action){
                     rs.push(reward);
                 }else{
@@ -80,7 +83,7 @@ class Agent{
     }
 }
 
-let env = new CliffWalkEnv();
+let env = new CliffWalkEnv(2,4);
 let agent = new Agent();
 
 for(let epoch=0;epoch<1000;epoch++){
