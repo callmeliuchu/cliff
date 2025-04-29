@@ -11,11 +11,13 @@ class CliffWalkVisualization {
         this.gridColor = '#bdc3c7';
         this.pathColor = 'rgba(52, 152, 219, 0.3)';
         this.agentHistory = [];
+        this.visitedCells = new Set();
     }
 
     clear() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.agentHistory = [];
+        this.visitedCells = new Set();
     }
 
     drawGrid() {
@@ -69,12 +71,33 @@ class CliffWalkVisualization {
         // 添加到历史记录
         this.agentHistory.push({row, col});
         
-        // 绘制历史路径
+        // 添加到已访问单元格集合
+        const cellKey = `${row},${col}`;
+        this.visitedCells.add(cellKey);
+        
+        // 重新绘制整个环境
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawGrid();
+        this.drawEnvironment();
+        
+        // 绘制历史路径，只绘制智能体实际访问过的单元格
         this.ctx.fillStyle = this.pathColor;
-        for (const pos of this.agentHistory) {
+        for (const cellKey of this.visitedCells) {
+            const [r, c] = cellKey.split(',').map(Number);
+            
+            // 跳过悬崖位置
+            if (r === this.env.rows - 1 && c > 0 && c < this.env.cols - 1) {
+                continue;
+            }
+            
+            // 跳过目标位置
+            if (r === this.env.rows - 1 && c === this.env.cols - 1) {
+                continue;
+            }
+            
             this.ctx.fillRect(
-                pos.col * this.cellWidth,
-                pos.row * this.cellHeight,
+                c * this.cellWidth,
+                r * this.cellHeight,
                 this.cellWidth,
                 this.cellHeight
             );
@@ -92,9 +115,7 @@ class CliffWalkVisualization {
     }
 
     render(state) {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawGrid();
-        this.drawEnvironment();
+        // 直接调用drawAgent，它会处理所有绘制
         this.drawAgent(state);
     }
 }
