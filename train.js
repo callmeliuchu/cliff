@@ -38,6 +38,7 @@ class Agent{
         this.policy_net = new Network(n_states, 200, n_actions);
         this.n_states = n_states;
         this.n_actions = n_actions;
+        this.random_eplisio = 0.0;
     }
     get_action(state){
         let state_arr = [];
@@ -51,7 +52,12 @@ class Agent{
         let [h, h_relu, out, out_softmax] = this.policy_net.forward(state_arr); // 4
         // console.log(state_arr,out_softmax);
         // 采样动作，javascript没有np.random.choice，根据probs 概率采样，概率大的采样概率大
-        let action = sampleAction(out_softmax);
+        let action;
+        if(Math.random() < this.random_eplisio){
+            action = Math.floor(Math.random() * (this.n_actions));
+        }else{
+            action = sampleAction(out_softmax);
+        }
         return [state_arr, h, h_relu, out, out_softmax,action];
     }
     update(rewards,agent_outputs){
@@ -78,8 +84,9 @@ class Agent{
             let [dW1,dW2] = this.policy_net.grad(state_arr,h,h_relu,out,out_softmax,dout);
             // console.log('dw1',dW1)
             // console.log('dw2',dW2)
-            this.policy_net.backward(dW1,dW2,0.01);
+            this.policy_net.backward(dW1,dW2,0.001);
         }
+        this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.1);
     }
 }
 
@@ -105,7 +112,7 @@ class Agent{
 // 全局变量
 let env;
 let agent;
-let maxEpochs = 1000;
+let maxEpochs = 5000;
 let isRunning = false;
 
 // 初始化函数
