@@ -110,7 +110,7 @@ let isRunning = false;
 
 // 初始化函数
 function initTraining() {
-    env = new CliffWalkEnv(2, 4);
+    env = new CliffWalkEnv(3, 5);
     agent = new Agent(env.cols * env.rows, 4);
     currentEpoch = 0; // 使用已经在 visualization.js 中声明的变量
     
