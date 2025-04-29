@@ -336,12 +336,12 @@ function cross_entropy_derive(probs,ys){
 function test_xor(){
     let data = [
         {input: [0, 1], output: [1,0]},
-        {input: [0.01, 0.01], output: [0,1]},
+        {input: [0.3, 0.3], output: [0,1]},
         {input: [1, 0], output: [1,0]},
         {input: [1, 1], output: [0,1]}
     ];
-    let net = new Network(2, 4, 2);
-    for(let j = 0; j < 1000; j++){
+    let net = new Network(2, 8, 2);
+    for(let j = 0; j < 500; j++){
         let total_dW1 = [];
         let total_dW2 = [];
         for(let i = 0; i < 4; i++){
