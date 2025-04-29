@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const speedControl = document.getElementById('speed-control');
     const currentEpochSpan = document.getElementById('current-epoch');
     const totalRewardSpan = document.getElementById('total-reward');
+    const demoButton = document.getElementById('demo-policy');
     
     // 初始化速度控制
     speedControl.addEventListener('input', () => {
@@ -165,6 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // 添加演示按钮事件处理
+    demoButton.addEventListener('click', () => {
+        if (!isTraining || isPaused) {
+            runDemonstration();
+        }
+    });
+    
     // 初始化可视化
     function initVisualization(env) {
         visualization = new CliffWalkVisualization(canvas, env);
@@ -190,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.startVisualization = startVisualization;
     window.runSingleEpoch = runSingleEpoch;
+    window.runDemonstration = runDemonstration;
 });
 
 function startVisualization() {
@@ -200,4 +209,9 @@ function startVisualization() {
 function runSingleEpoch() {
     // 这个函数将在train.js中实现
     console.log("执行单步训练");
+}
+
+function runDemonstration() {
+    // 这个函数将在train.js中实现
+    console.log("演示最优策略");
 } 

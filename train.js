@@ -40,6 +40,20 @@ class Agent{
         this.n_actions = n_actions;
         this.random_eplisio = 0.0;
     }
+    get_max_prob_action(state){
+        let state_arr = [];
+        for(let i=0;i<this.n_states;i++){
+            if(i == state){
+                state_arr.push(1);
+            }else{
+                state_arr.push(0);
+            }
+        }
+        let [h, h_relu, out, out_softmax] = this.policy_net.forward(state_arr); // 4
+        let max_prob = Math.max(...out_softmax);
+        let max_prob_action = out_softmax.indexOf(max_prob);
+        return max_prob_action;
+    }
     get_action(state){
         let state_arr = [];
         for(let i=0;i<this.n_states;i++){
@@ -112,7 +126,7 @@ class Agent{
 // 全局变量
 let env;
 let agent;
-let maxEpochs = 5000;
+let maxEpochs = 1000;
 let isRunning = false;
 
 // 初始化函数
@@ -196,6 +210,44 @@ async function runSingleEpoch() {
     }
 }
 
+// 演示最优策略
+async function demonstrateOptimalPolicy() {
+    if (isRunning) return;
+    
+    // 清除可视化历史
+    if (typeof window !== 'undefined' && window.initVisualization) {
+        window.initVisualization(env);
+    }
+    
+    let state = env.reset();
+    let totalReward = 0;
+    
+    // 更新可视化
+    if (typeof window !== 'undefined' && window.updateVisualization) {
+        window.updateVisualization(state, "演示", totalReward);
+    }
+    
+    while (!env.done) {
+        // 使用最大概率动作（贪婪策略）
+        let action = agent.get_max_prob_action(state);
+        let [next_state, reward, done] = env.step(action);
+        totalReward += reward;
+        
+        // 更新可视化
+        if (typeof window !== 'undefined' && window.updateVisualization) {
+            window.updateVisualization(next_state, "演示", totalReward);
+            
+            // 控制动画速度
+            const speed = window.getAnimationSpeed ? window.getAnimationSpeed() : 50;
+            await new Promise(resolve => setTimeout(resolve, 101 - speed));
+        }
+        
+        state = next_state;
+    }
+    
+    console.log('演示完成，总奖励: ' + totalReward);
+}
+
 // 浏览器环境下的初始化
 if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', () => {
@@ -204,6 +256,7 @@ if (typeof window !== 'undefined') {
         // 连接到可视化控制
         window.startVisualization = startTraining;
         window.runSingleEpoch = runSingleEpoch;
+        window.runDemonstration = demonstrateOptimalPolicy; // 新增的演示函数
     });
 } else {
     // Node.js环境下直接运行
