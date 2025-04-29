@@ -1,5 +1,3 @@
-
-
 function sampleAction(probs) {
     // 生成一个0到1之间的随机数
     const r = Math.random();
@@ -16,7 +14,6 @@ function sampleAction(probs) {
     // 如果由于浮点数精度问题没有返回，则返回最后一个索引
     return probs.length - 1;
 }
-
 
 // let n_states = 8;
 // let n_actions = 4;
@@ -35,7 +32,6 @@ function discount_rewards(rewards,gamma){
     res = res.map(x=>x/std);
     return res; 
 }
-
 
 class Agent{
     constructor(n_states,n_actions){
@@ -87,23 +83,131 @@ class Agent{
     }
 }
 
-let env = new CliffWalkEnv(2,4);
-let agent = new Agent(env.cols * env.rows, 4);
+// let env = new CliffWalkEnv(2,4);
+// let agent = new Agent(env.cols * env.rows, 4);
 
-for(let epoch=0;epoch<1000;epoch++){
+// for(let epoch=0;epoch<1000;epoch++){
+//     let rewards = [];
+//     let agent_outputs = [];
+//     let state = env.reset();
+//     while(!env.done){
+//         let [state_arr, h, h_relu, out, out_softmax,action] = agent.get_action(state);
+//         let [next_state, reward, done] = env.step(action);
+//         rewards.push(reward);
+//         agent_outputs.push([state_arr, h, h_relu, out, out_softmax,action]);
+//         state = next_state;
+//     }
+//     agent.update(rewards,agent_outputs);
+//     console.log('rewards1111',env.totalReward);
+
+// }
+
+// 全局变量
+let env;
+let agent;
+let maxEpochs = 1000;
+let isRunning = false;
+
+// 初始化函数
+function initTraining() {
+    env = new CliffWalkEnv(2, 4);
+    agent = new Agent(env.cols * env.rows, 4);
+    currentEpoch = 0; // 使用已经在 visualization.js 中声明的变量
+    
+    // 初始化可视化
+    if (typeof window !== 'undefined' && window.initVisualization) {
+        window.initVisualization(env);
+    }
+}
+
+// 运行单个回合
+async function runEpoch() {
     let rewards = [];
     let agent_outputs = [];
     let state = env.reset();
-    while(!env.done){
-        let [state_arr, h, h_relu, out, out_softmax,action] = agent.get_action(state);
+    
+    // 更新可视化
+    if (typeof window !== 'undefined' && window.updateVisualization) {
+        window.updateVisualization(state, currentEpoch, env.totalReward);
+    }
+    
+    while (!env.done) {
+        // 检查是否暂停
+        if (typeof window !== 'undefined' && window.isTrainingPaused && window.isTrainingPaused()) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            continue;
+        }
+        
+        let [state_arr, h, h_relu, out, out_softmax, action] = agent.get_action(state);
         let [next_state, reward, done] = env.step(action);
         rewards.push(reward);
-        agent_outputs.push([state_arr, h, h_relu, out, out_softmax,action]);
+        agent_outputs.push([state_arr, h, h_relu, out, out_softmax, action]);
+        
+        // 更新可视化
+        if (typeof window !== 'undefined' && window.updateVisualization) {
+            window.updateVisualization(next_state, currentEpoch, env.totalReward);
+            
+            // 控制动画速度
+            const speed = window.getAnimationSpeed ? window.getAnimationSpeed() : 50;
+            await new Promise(resolve => setTimeout(resolve, 101 - speed));
+        }
+        
         state = next_state;
     }
-    agent.update(rewards,agent_outputs);
-    console.log('rewards1111',env.totalReward);
+    
+    agent.update(rewards, agent_outputs);
+    console.log('回合 ' + currentEpoch + ' 总奖励: ' + env.totalReward);
+    
+    currentEpoch++;
+}
 
+// 开始训练
+async function startTraining() {
+    if (isRunning) return;
+    isRunning = true;
+    
+    while (currentEpoch < maxEpochs) {
+        // 检查是否暂停
+        if (typeof window !== 'undefined' && window.isTrainingPaused && window.isTrainingPaused()) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            continue;
+        }
+        
+        await runEpoch();
+    }
+    
+    isRunning = false;
+    console.log('训练完成');
+}
+
+// 运行单步训练
+async function runSingleEpoch() {
+    if (currentEpoch < maxEpochs) {
+        await runEpoch();
+    } else {
+        console.log('已达到最大回合数');
+    }
+}
+
+// 浏览器环境下的初始化
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        initTraining();
+        
+        // 连接到可视化控制
+        window.startVisualization = startTraining;
+        window.runSingleEpoch = runSingleEpoch;
+    });
+} else {
+    // Node.js环境下直接运行
+    initTraining();
+    startTraining();
+}
+
+// 保留原始代码的兼容性
+if (typeof module !== 'undefined' && module.exports) {
+    // 如果在Node.js环境中
+    module.exports = { initTraining, runEpoch, startTraining };
 }
 
 

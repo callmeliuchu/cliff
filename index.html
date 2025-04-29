@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CliffWalk 可视化</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #canvas-container {
+            margin-top: 20px;
+        }
+        canvas {
+            border: 1px solid #000;
+            background-color: #f0f0f0;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button {
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+        .info {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CliffWalk 智能体可视化</h1>
+    
+    <div class="controls">
+        <button id="start-training">开始训练</button>
+        <button id="pause-training">暂停</button>
+        <button id="step-training">单步执行</button>
+        <input type="range" id="speed-control" min="1" max="100" value="50">
+        <label for="speed-control">速度</label>
+    </div>
+    
+    <div class="info">
+        <p>当前回合: <span id="current-epoch">0</span> / <span id="total-epochs">1000</span></p>
+        <p>总奖励: <span id="total-reward">0</span></p>
+    </div>
+    
+    <div id="canvas-container">
+        <canvas id="cliff-walk-canvas" width="400" height="200"></canvas>
+    </div>
+    
+    <script src="env.js"></script>
+    <script src="network.js"></script>
+    <script src="agent.js"></script>
+    <script src="visualization.js"></script>
+    <script src="train.js"></script>
+</body>
+</html>
