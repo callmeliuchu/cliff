@@ -98,7 +98,7 @@ class Agent{
             let [dW1,dW2] = this.policy_net.grad(state_arr,h,h_relu,out,out_softmax,dout);
             // console.log('dw1',dW1)
             // console.log('dw2',dW2)
-            this.policy_net.backward(dW1,dW2,0.001);
+            this.policy_net.backward(dW1,dW2,0.002);
         }
         this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.1);
     }
