@@ -328,7 +328,7 @@ function cross_entropy(probs,ys){
 function cross_entropy_derive(probs,ys){
     let res = [];
     for(let i = 0; i < probs.length; i++){
-        res.push(-ys[i] / probs[i]);
+        res.push(-ys[i] /(probs[i]+1e-15));
     }
     return res;
 }

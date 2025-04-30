@@ -3,7 +3,7 @@ class CliffWalkEnv {
     constructor(rows=2, cols=3) {
         this.rows = rows;
         this.cols = cols;
-        this.maxSteps = rows * cols * 10;  // 设置最大步数为格子数的3倍
+        this.maxSteps = 200;  // 设置最大步数为格子数的3倍
         this.reset();
     }
 
@@ -57,7 +57,7 @@ class CliffWalkEnv {
 
         // Check if hit cliff or reached goal
         if (row === this.rows - 1 && col > 0 && col < this.cols - 1) {
-            reward = -50;  // 悬崖惩罚
+            reward = -10;  // 悬崖惩罚
             // done = true;   // 掉悬崖立即结束
         } else if (row === this.rows - 1 && col === this.cols - 1) {
             reward = 10;   // 增加到达目标的奖励

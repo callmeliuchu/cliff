@@ -38,7 +38,7 @@ class Agent{
         this.policy_net = new Network(n_states, 200, n_actions);
         this.n_states = n_states;
         this.n_actions = n_actions;
-        this.random_eplisio = 0.0;
+        this.random_eplisio = 0.5;
     }
     get_max_prob_action(state){
         let state_arr = [];
@@ -98,9 +98,10 @@ class Agent{
             let [dW1,dW2] = this.policy_net.grad(state_arr,h,h_relu,out,out_softmax,dout);
             // console.log('dw1',dW1)
             // console.log('dw2',dW2)
-            this.policy_net.backward(dW1,dW2,0.002);
+            this.policy_net.backward(dW1,dW2,0.01/rewards.length);
         }
-        this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.1);
+        this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.05);
+        console.log('random_eplisio',this.random_eplisio);
     }
 }
 
