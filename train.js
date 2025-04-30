@@ -29,7 +29,7 @@ function discount_rewards(rewards,gamma){
     // mean std
     let mean = res.reduce((a,b)=>a+b,0)/res.length;
     let std = Math.sqrt(res.reduce((a,b)=>a+Math.pow(b-mean,2),0)/res.length);
-    res = res.map(x=>x/std);
+    res = res.map(x=>x/(std+1e-15));
     return res; 
 }
 
