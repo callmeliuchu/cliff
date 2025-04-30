@@ -3,7 +3,7 @@ class CliffWalkEnv {
     constructor(rows=2, cols=3) {
         this.rows = rows;
         this.cols = cols;
-        this.maxSteps = 200;  // 设置最大步数为格子数的3倍
+        this.maxSteps = 100;  // 设置最大步数为格子数的3倍
         this.reset();
     }
 

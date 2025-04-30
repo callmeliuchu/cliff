@@ -69,6 +69,7 @@ class Agent{
         let action;
         if(Math.random() < this.random_eplisio){
             action = Math.floor(Math.random() * (this.n_actions));
+            console.log('随机动作',action);
         }else{
             action = sampleAction(out_softmax);
         }
@@ -100,7 +101,7 @@ class Agent{
             // console.log('dw2',dW2)
             this.policy_net.backward(dW1,dW2,0.01/rewards.length);
         }
-        this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.05);
+        this.random_eplisio = Math.max(this.random_eplisio * 0.999,0.05);
         console.log('random_eplisio',this.random_eplisio);
     }
 }
