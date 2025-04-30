@@ -104,8 +104,10 @@ class Agent{
             // console.log('dw2',dW2)
             this.policy_net.backward(dW1,dW2,0.01/rewards.length);
         }
-        if(this.update_count < 1000){
+        if(this.update_count < 500){
             this.random_eplisio = 0.7;
+        }else if(this.update_count <1000){
+            this.random_eplisio = 0.5;
         }else if(this.update_count <1500){
             this.random_eplisio = 0.3;
         }else{
