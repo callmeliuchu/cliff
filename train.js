@@ -38,7 +38,8 @@ class Agent{
         this.policy_net = new Network(n_states, 200, n_actions);
         this.n_states = n_states;
         this.n_actions = n_actions;
-        this.random_eplisio = 0.5;
+        this.random_eplisio = 0.7;
+        this.update_count = 0;
     }
     get_max_prob_action(state){
         let state_arr = [];
@@ -69,9 +70,10 @@ class Agent{
         let action;
         if(Math.random() < this.random_eplisio){
             action = Math.floor(Math.random() * (this.n_actions));
-            console.log('随机动作',action);
+            // console.log('随机动作',action);
         }else{
             action = sampleAction(out_softmax);
+            // console.log('抽样动作',action);
         }
         return [state_arr, h, h_relu, out, out_softmax,action];
     }
@@ -79,6 +81,7 @@ class Agent{
         // let dW1,dW2 = this.policy_net.grad(states,actions,rewards,probs);
         // this.policy_net.backward(dW1,dW2,lr);
         rewards = discount_rewards(rewards,0.99);
+        this.update_count++;
         for(let i=0;i<rewards.length;i++){
             let reward = rewards[i]; // 1
             let [state_arr, h, h_relu, out, out_softmax,action] = agent_outputs[i]; // [h, h_relu, out, out_softmax,action]
@@ -101,9 +104,16 @@ class Agent{
             // console.log('dw2',dW2)
             this.policy_net.backward(dW1,dW2,0.01/rewards.length);
         }
-        this.random_eplisio = Math.max(this.random_eplisio * 0.999,0.05);
-        console.log('random_eplisio',this.random_eplisio);
-    }
+        if(this.update_count < 1000){
+            this.random_eplisio = 0.7;
+        }else if(this.update_count <1500){
+            this.random_eplisio = 0.3;
+        }else{
+            this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.05);
+        }
+            console.log('random_eplisio',this.random_eplisio);
+
+        }
 }
 
 // let env = new CliffWalkEnv(2,4);
@@ -128,10 +138,11 @@ class Agent{
 // 全局变量
 let env;
 let agent;
-let maxEpochs = 1000;
+let maxEpochs = 2000;
 let isRunning = false;
 
-// 初始化函数
+document.getElementById('total-epochs').innerText = maxEpochs;
+
 function initTraining() {
     env = new CliffWalkEnv(3, 5);
     agent = new Agent(env.cols * env.rows, 4);
