@@ -36,6 +36,8 @@ function discount_rewards(rewards,gamma){
 class Agent{
     constructor(n_states,n_actions){
         this.policy_net = new Network(n_states, 200, n_actions);
+        this.value_net = new Network2(n_states, 200, 1);
+
         this.n_states = n_states;
         this.n_actions = n_actions;
         this.random_eplisio = 0.7;
@@ -82,17 +84,27 @@ class Agent{
         // this.policy_net.backward(dW1,dW2,lr);
         rewards = discount_rewards(rewards,0.99);
         this.update_count++;
+
+        let values_dw = [];
         for(let i=0;i<rewards.length;i++){
             let reward = rewards[i]; // 1
             let [state_arr, h, h_relu, out, out_softmax,action] = agent_outputs[i]; // [h, h_relu, out, out_softmax,action]
+            let [value_h, value_h_relu, value_out] = this.value_net.forward(state_arr); // 1
+            let mse = mean_square_error([reward],value_out);
+            console.log('mse',mse,reward,value_out);
+            let value_dout = mean_square_error_derive([reward],value_out);
+            let [value_dW1,value_dW2] = this.value_net.grad(state_arr,value_h,value_h_relu,value_dout);
+            values_dw.push([value_dW1,value_dW2]);
+            
             let rs =  [];
             for(let k=0;k<this.n_actions;k++){
                 if(k == action){
-                    rs.push(reward);
+                    rs.push(reward-value_out[0]);
                 }else{
                     rs.push(0);
                 }
             }
+
             let entropy = cross_entropy(out_softmax,rs);
             console.log('entropy',entropy);
             let dout = cross_entropy_derive(out_softmax,rs);
@@ -104,11 +116,20 @@ class Agent{
             // console.log('dw2',dW2)
             this.policy_net.backward(dW1,dW2,0.01/rewards.length);
         }
-        if(this.update_count < 500){
+        for(let e=0;e<4;e++){
+            for(let i=0;i<values_dw.length;i++){
+                this.value_net.backward(values_dw[i][0],values_dw[i][1],0.01/rewards.length);
+            }
+        }
+
+
+
+
+        if(this.update_count < maxEpochs * 0.2){
             this.random_eplisio = 0.7;
-        }else if(this.update_count <1000){
+        }else if(this.update_count <maxEpochs * 0.8){
             this.random_eplisio = 0.5;
-        }else if(this.update_count <1500){
+        }else if(this.update_count < maxEpochs * 0.9){
             this.random_eplisio = 0.3;
         }else{
             this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.05);
@@ -140,7 +161,7 @@ class Agent{
 // 全局变量
 let env;
 let agent;
-let maxEpochs = 2000;
+let maxEpochs = 2500;
 let isRunning = false;
 
 document.getElementById('total-epochs').innerText = maxEpochs;

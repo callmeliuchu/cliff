@@ -112,6 +112,28 @@ class CliffWalkVisualization {
             );
         }
 
+
+        // 绘制悬崖背景
+        let col = Math.floor(this.env.cols/2);
+        let row = this.env.rows - 2;
+        this.ctx.fillStyle = this.cliffColor;
+        this.ctx.fillRect(
+            col * this.cellWidth + 1,
+            row * this.cellHeight + 1,
+            this.cellWidth - 2,
+            this.cellHeight - 2
+        );
+        
+        // 绘制悬崖图像
+        this.ctx.drawImage(
+            this.cliffImg,
+            col * this.cellWidth + 5,
+            row * this.cellHeight + 5,
+            this.cellWidth - 10,
+            this.cellHeight - 10
+        );
+        
+
         // 绘制目标
         const goalRow = this.env.rows - 1;
         const goalCol = this.env.cols - 1;

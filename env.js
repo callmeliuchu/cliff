@@ -59,8 +59,10 @@ class CliffWalkEnv {
         if (row === this.rows - 1 && col > 0 && col < this.cols - 1) {
             reward = -10;  // 悬崖惩罚
             // done = true;   // 掉悬崖立即结束
-        } else if (row === this.rows - 1 && col === this.cols - 1) {
-            reward = 30;   // 增加到达目标的奖励
+        } else if(row === this.rows - 2 && col === Math.floor(this.cols/2)) {
+            reward = -10;
+        }else if (row === this.rows - 1 && col === this.cols - 1) {
+            reward = 10;   // 增加到达目标的奖励
             done = true;
         }
 
