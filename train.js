@@ -126,7 +126,7 @@ class Agent{
 
 
         if(this.update_count < maxEpochs * 0.2){
-            this.random_eplisio = 0.3;
+            this.random_eplisio = 0.5;
         // }else if(this.update_count <maxEpochs * 0.8){
         //     // this.random_eplisio = 0.5;
         // }else if(this.update_count < maxEpochs * 0.9){
