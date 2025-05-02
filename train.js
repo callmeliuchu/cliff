@@ -126,13 +126,13 @@ class Agent{
 
 
         if(this.update_count < maxEpochs * 0.2){
-            this.random_eplisio = 0.7;
-        }else if(this.update_count <maxEpochs * 0.8){
-            this.random_eplisio = 0.5;
-        }else if(this.update_count < maxEpochs * 0.9){
             this.random_eplisio = 0.3;
+        // }else if(this.update_count <maxEpochs * 0.8){
+        //     // this.random_eplisio = 0.5;
+        // }else if(this.update_count < maxEpochs * 0.9){
+            // this.random_eplisio = 0.3;
         }else{
-            this.random_eplisio = Math.max(this.random_eplisio * 0.99,0.05);
+            this.random_eplisio = Math.max(this.random_eplisio * 0.995,0.05);
         }
             console.log('random_eplisio',this.random_eplisio);
 
@@ -161,7 +161,7 @@ class Agent{
 // 全局变量
 let env;
 let agent;
-let maxEpochs = 2500;
+let maxEpochs = 1500;
 let isRunning = false;
 
 document.getElementById('total-epochs').innerText = maxEpochs;
